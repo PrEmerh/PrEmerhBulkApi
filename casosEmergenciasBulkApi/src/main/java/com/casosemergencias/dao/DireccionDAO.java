@@ -456,11 +456,17 @@ public class DireccionDAO {
 			} else {
 				query.setLength(query.length() - 5);
 			}
-
+			
 			if (order != null && !"".equals(order) && dirOrder != null && !"".equals(dirOrder)) {
-				query.append(" ORDER BY direccion.direccionConcatenada asc");
+				if("name".equals(order) || "direccionConcatenada".equals(order)|| "comuna".equals(order)
+				|| "calle".equals(order)){
+					query.append(" ORDER BY " + order + " " + dirOrder);
+				}else{
+					query.append(" ORDER BY direccion." + order + " " + dirOrder);
+				}
+			}else{
+				query.append(" ORDER BY direccion.direccionConcatenada desc" );
 			}
-
 			Query result = session.createQuery(query.toString()).setFirstResult(numStart).setMaxResults(numLength);
 			List<DireccionVO> direccionList = result.list();
 
@@ -493,7 +499,7 @@ public class DireccionDAO {
 			if (dataTableProperties.getColumsInfo() != null && !dataTableProperties.getColumsInfo().isEmpty()) {
 				sqlQuery.append(" WHERE ");
 				for (DataTableColumnInfo columnInfo : dataTableProperties.getColumsInfo()) {
-					if ("comuna".equals(columnInfo.getData())) {
+					if ("name".equals(columnInfo.getData())) {
 						if (columnInfo.getSearchValue() != null && !"".equals(columnInfo.getSearchValue())) {
 							sqlQuery.append(columnInfo.getData() + " LIKE '%" + columnInfo.getSearchValue() + "%'");
 							sqlQuery.append(" AND ");
@@ -501,7 +507,23 @@ public class DireccionDAO {
 						}
 					}
 
+					if ("direccionConcatenada".equals(columnInfo.getData())) {
+						if (columnInfo.getSearchValue() != null && !"".equals(columnInfo.getSearchValue())) {
+							sqlQuery.append("UPPER(" + columnInfo.getData() + ") LIKE UPPER('%"
+									+ columnInfo.getSearchValue() + "%')");
+							sqlQuery.append(" AND ");
+							searchParamsCounter++;
+						}
+					}
 					if ("calle".equals(columnInfo.getData())) {
+						if (columnInfo.getSearchValue() != null && !"".equals(columnInfo.getSearchValue())) {
+							sqlQuery.append("UPPER(" + columnInfo.getData() + ") LIKE UPPER('%"
+									+ columnInfo.getSearchValue() + "%')");
+							sqlQuery.append(" AND ");
+							searchParamsCounter++;
+						}
+					}
+					if ("comuna".equals(columnInfo.getData())) {
 						if (columnInfo.getSearchValue() != null && !"".equals(columnInfo.getSearchValue())) {
 							sqlQuery.append("UPPER(" + columnInfo.getData() + ") LIKE UPPER('%"
 									+ columnInfo.getSearchValue() + "%')");
